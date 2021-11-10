@@ -1,0 +1,26 @@
+﻿<div style="padding:2em">
+  <button style="background:#334f8c;border-style: none;border-radius:2em;min-height:3em;min-width: 10em;color: #fff;margin: 3em 0 1em 0;" onclick="Agregar();">Agregar Artículo</button>
+  <table class="row-border order-column" id="table_herramientasventa">
+    <thead>
+      <tr>
+        <th>CLAVE DEL EQUIPO</th>
+        <th>DESCRIPCIÓN</th>
+        <th>ACCESO A HERRAMIENTAS</th>
+        <th>ACCIONES</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+
+<input type="hidden" data-request-url="@Url.Action("GetHerramientas", "AdminHV")" data-raiz="@Url.Content("~/")" id="urlGetHerramientas" />
+<input type="hidden" data-request-url="@Url.Action("Editar", "AdminHV")" data-raiz="@Url.Content("~/")" id="urlUpdateHerramientas" />
+<input type="hidden" data-request-url="@Url.Action("Agregar", "AdminHV")" data-raiz="@Url.Content("~/")" id="urlSaveHerramientas" />
+<input type="hidden" data-request-url="@Url.Action("Deshabilitar", "AdminHV")" data-raiz="@Url.Content("~/")" id="urlDisableHerramientas" />
+
+@section Scripts{
+  <script>
+    cargarTablaHerramientas();
+  </script>
+}

@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewData["Title"] = "Códigos Promocionales";
+}
+
+<div class="container-fluid mx-0 my-5 pt-5">
+    <div class="row">
+        <div class="col-4">
+            <h1>@ViewData["Title"] </h1>
+        </div>
+        <div class="col-2">
+            <a asp-controller="PromoCodes" asp-action="CreateCode" class="btn btn-success mt-3" type="button"><i class="fa fa-plus"></i></a>
+        </div>
+    </div>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="tab1Action" data-toggle="tab" href="#tab1" role="tab" aria-controls="historial" aria-selected="false">Activos</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab2Action" data-toggle="tab" href="#tab2" role="tab" aria-controls="parcels" aria-selected="true">Historial</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active m-3" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+            <table id="promoCodeTable" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Código Promocional</th>
+                        <th>Sitios</th>
+                        <th>Fecha de Inicio</th>
+                        <th>Fecha de Caducidad</th>
+                        <th>Fecha de Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (PromoCodeInfo promoCode in ViewData["promoCodeList"] as List<PromoCodeInfo>)
+                    {
+                        if (promoCode.ExpireDate < DateTime.Today) continue;
+                        string CheckboxEnable = promoCode.Enabled ? "checked" : "";
+                        <tr>
+                            <td>@promoCode.Id</td>
+                            <td>@promoCode.PromoCode</td>
+                            <td>@promoCode.SiteId</td>
+                            <td>@promoCode.StartDate</td>
+                            <td>@promoCode.ExpireDate</td>
+                            <td>@promoCode.InsertDate</td>
+                            <td>
+                                <a asp-controller="PromoCodes" asp-action="CodeInfo" asp-route-codeId="@promoCode.PromoCode" class="btn btn-dark" asp type="button"><i class="fa fa-info"></i></a>
+                                <a asp-controller="PromoCodes" asp-action="UpdateCode" asp-route-codeId="@promoCode.Id" class="btn btn-dark" asp type="button"><i class="fa fa-pen"></i></a>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input enablerButton" @CheckboxEnable data-id="@promoCode.Id" id="customSwitch-@promoCode.Id">
+                                    <label class="custom-control-label" for="customSwitch-@promoCode.Id"></label>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade m-3" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+            <table id="historialPromoTable" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Código Promocional</th>
+                        <th>Sitios</th>
+                        <th>Fecha de Inicio</th>
+                        <th>Fecha de Caducidad</th>
+                        <th>Fecha de Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (PromoCodeInfo promoCode in ViewData["promoCodeList"] as List<PromoCodeInfo>)
+                    {
+                        if (promoCode.ExpireDate >= DateTime.Today) continue;
+                        string CheckboxEnable = promoCode.Enabled ? "checked" : "";
+                        <tr>
+                            <td>@promoCode.Id</td>
+                            <td>@promoCode.PromoCode</td>
+                            <td>@promoCode.SiteId</td>
+                            <td>@promoCode.StartDate</td>
+                            <td>@promoCode.ExpireDate</td>
+                            <td>@promoCode.InsertDate</td>
+                            <td>
+                                <a asp-controller="PromoCodes" asp-action="CodeInfo" asp-route-codeId="@promoCode.PromoCode" class="btn btn-dark" asp type="button"><i class="fa fa-info"></i></a>
+                                <a asp-controller="PromoCodes" asp-action="UpdateCode" asp-route-codeId="@promoCode.Id" class="btn btn-dark" asp type="button"><i class="fa fa-pen"></i></a>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input enablerButton" @CheckboxEnable data-id="@promoCode.Id" id="customSwitch-@promoCode.Id">
+                                    <label class="custom-control-label" for="customSwitch-@promoCode.Id"></label>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+<script>
+    $('#promoCodeTable').DataTable({
+        "order": [[0, "desc"]]
+    });
+    const nodes = $('#promoCodeTable').dataTable().fnGetNodes();
+    const buttons = $(nodes).find('.enablerButton');
+    $(buttons).click(function () {
+        let promoCodeId = $(this).data('id');
+        let enabledStatus = $(this).prop('checked')? 1 : 0;
+        console.log(promoCodeId);
+        $.post('@Url.Action("PromoCodeEnabler", "PromoCodes")', { promoCodeId, enabledStatus }).done(function (data) {
+            if (data.success) {
+                toastr.success(data.message);
+            } else {
+                toastr.warning(data.message);
+            }
+        });
+    });
+
+    $('#historialPromoTable').DataTable({
+        "order": [[0, "desc"]]
+    });
+    const node = $('#historialPromoTable').dataTable().fnGetNodes();
+    const button = $(node).find('.enablerButton');
+    $(button).click(function () {
+        let promoCodeId = $(this).data('id');
+        let enabledStatus = $(this).prop('checked')? 1 : 0;
+        console.log(promoCodeId);
+        $.post('@Url.Action("PromoCodeEnabler", "PromoCodes")', { promoCodeId, enabledStatus }).done(function (data) {
+            if (data.success) {
+                toastr.success(data.message);
+            } else {
+                toastr.warning(data.message);
+            }
+        });
+    });
+
+</script>
+
+}

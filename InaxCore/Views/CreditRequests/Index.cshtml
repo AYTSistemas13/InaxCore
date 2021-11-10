@@ -1,0 +1,390 @@
+﻿@model List<CreditRequestModel>
+@{
+    ViewData["Title"] = "Solicitudes Credito/Transferencias";
+}
+
+<div class="container-fluid mx-0 my-5 pt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1>@ViewData["Title"] </h1>
+        </div>
+    </div>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="tab1Action" data-toggle="tab" href="#tab1" role="tab" aria-controls="historical" aria-selected="false">Solicitudes Pendientes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab2Action" data-toggle="tab" href="#tab2" role="tab" aria-controls="parcels" aria-selected="true">Historial</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active m-3" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+            <table id="creditRequestTable" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Ov</th>
+                        <th># Cliente</th>
+                        <th>Nombre Cliente</th>
+                        <th>Zona de Ventas</th>
+                        <th>Monto de OV</th>
+                        <th>Fecha de Creacion</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (CreditRequestModel creditRequest in Model)
+                    {
+                        if (creditRequest.Status == 1 || creditRequest.Status == 4) continue;
+                        string statuscolor = creditRequest.Status == 3 ? "bg-warning" : "";
+                        <tr class="@statuscolor">
+                            <td>@creditRequest.Id</td>
+                            <td>@creditRequest.Ov</td>
+                            <td>@creditRequest.ClientCode</td>
+                            <td>@creditRequest.ClientName</td>
+                            <td>@creditRequest.Zone</td>
+                            <td class="text-left">$@creditRequest.OvAmmount</td>
+                            <td>@creditRequest.InsertDate</td>
+                            <td class="text-center bg-light">
+                                @if (creditRequest.RequestType == 1 || creditRequest.Status == 3)
+                                {
+                                    <button class="btn btn-warning releaseOv" type="button" data-ov="@creditRequest.Ov" data-id="@creditRequest.Id"><i class="fa fa-unlock-alt"></i></button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-success createDiary" type="button" data-id="@creditRequest.Id" data-ov="@creditRequest.Ov" data-ammount="@creditRequest.OvAmmount" data-clientcode="@creditRequest.ClientCode"><i class="fa fa-dollar-sign"></i></button>
+                                }
+                                <button type="button" class="btn btn-danger denyRequest" data-id="@creditRequest.Id"><i class="fa fa-times"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade  m-3" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+            <table id="historicRequestTable" class="table table-striped table-bordered" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Ov</th>
+                        <th># Cliente</th>
+                        <th>Nombre Cliente</th>
+                        <th>Zona de Ventas</th>
+                        <th>Monto de OV</th>
+                        <th>Fecha de Creacion</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (CreditRequestModel creditRequest in Model)
+                    {
+                        if (creditRequest.Status == 0 || creditRequest.Status == 3) continue;
+                        string statuscolor = creditRequest.Status == 4 ? "bg-danger" : "";
+                        <tr>
+                            <td class="@statuscolor">@creditRequest.Id</td>
+                            <td>@creditRequest.Ov</td>
+                            <td>@creditRequest.ClientCode</td>
+                            <td>@creditRequest.ClientName</td>
+                            <td>@creditRequest.Zone</td>
+                            <td class="text-left">$@creditRequest.OvAmmount</td>
+                            <td>@creditRequest.InsertDate</td>
+                            <td class="text-center bg-light">
+                                <button type="button" class="btn btn-primary openInfoModal" data-id="@creditRequest.Id"><i class="fa fa-info"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="createDiaryModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Diario de pago</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="diaryForm">
+                    <input type="hidden" name="ov" id="diaryOv" />
+                    <input type="hidden" name="clientCode" id="diaryClientCode" />
+                    <input type="hidden" name="requestId" id="requestId" />
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="diaryAmmountInput">Monto:</label>
+                            <input type="text" class="form-control" id="diaryAmmountInput" name="diaryAmmount" placeholder="Introduce Cantidad" required>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="journalNameInput">Nombre:</label>
+                            <select id="journalNameInput" name="journalName" class="form-control" required>
+                                <option value="CB_CCH1">CB_CCH1</option>
+                                <option value="CB_CCH5">CB_CCH5</option>
+                                <option value="CB_CULN">CB_CULN</option>
+                                <option value="CB_EDMX">CB_EDMX</option>
+                                <option value="CB_GDLJ">CB_GDLJ</option>
+                                <option value="CB_JURZ">CB_JURZ</option>
+                                <option value="CB_MEXL">CB_MEXL</option>
+                                <option value="CB_OBRG">CB_OBRG</option>
+                                <option value="CB_TJNA">CB_TJNA</option>
+                                <option value="CB_TORN">CB_TORN</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="diarioCuentaContraInput">Cuenta de Contrapartida:</label>
+                            <select id="diarioCuentaContraInput" name="diarioCuentaContra" class="form-control" required>
+                                <option value="BANMER6065">BANCOMER DLLS CHIHUAHUA 0442666065</option>
+                                <option value="BANMER6073">BBVA BANCOMER CHIHUAHUA 0442666073</option>
+                                <option value="BANMEX5673">BANAMEX CHIHUAHUA 4305673</option>
+                                <option value="SANTER2218">SANTANDER CHIHUAHUA 65174302218</option>
+                                <option value="SANTER6526">SANTANDER CHIHUAHUA 65504316526</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="tipoPagoInput">Tipo de pago:</label>
+                            <select id="tipoPagoInput" name="tipoPago" class="form-control" required>
+                                <option value="PUE">PUE</option>
+                                <option value="PPD">PPD</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-8">
+                            <label for="payReferenceInput">Referencia de pago (Ficha de Deposito):</label>
+                            <input type="text" class="form-control" id="payReferenceInput" name="payReference" placeholder="Introduce Referencia" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="submit" form="diaryForm" class="btn btn-primary">Crear</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="requestInfoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" style="max-width: 70% !important;">
+        <div class="modal-content" style="height: 70vh !important;">
+            <div class="modal-header">
+                <h5 class="modal-title">Comentarios y Documentos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-8 pr-0">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fa fa-comment-alt"></i> Comentarios
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="pr-4 pr-4" id="messageBox" style="height: 45vh; overflow-y: scroll;">
+                                </div>
+                                <div class="row my-1 pl-4" style="width: 100%;" id="sendMessageDiv">
+                                    <div class="col-11" style="padding: 0;"><input type="text" class="form-control" placeholder="Escribe Algo.." id="messageInput" /></div>
+                                    <div class="col-1" style="padding: 0;"><button class="btn btn-outline-primary" id="sendMessage"><i class="fa fa-paper-plane"></i></button></div>
+                                    <input type="hidden" name="Ov" id="Ov" />
+                                    <input type="hidden" name="RequestId" id="RequestId" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card">
+                            <div class="card-header">
+                                Documentos
+                            </div>
+                            <div class="card-body" style="max-height: 300px; overflow-y: scroll;">
+                                <div class="row" id="filesBox">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+
+    <script>
+        $('#creditRequestTable').DataTable();
+        $('#historicRequestTable').DataTable();
+
+        let extensionFileIcon = {
+            png: ['fa-file-image', 'btn-outline-secondary' ],
+            jpg: ['fa-file-image', 'btn-outline-secondary' ],
+            jpeg: ['fa-file-image', 'btn-outline-secondary' ],
+            gif: ['fa-file-image', 'btn-outline-secondary' ],
+            pdf: ['fa-file-pdf', 'btn-outline-danger' ],
+            doc: ['fa-file-word', 'btn-outline-primary' ],
+            docx: ['fa-file-word', 'btn-outline-primary' ],
+            odt: ['fa-file-word', 'btn-outline-primary' ]
+        }
+
+
+        $('.openInfoModal').click(function () {
+            $('body').attr('data-msj', 'Procesando Petición ...');
+            $('body').addClass('load-ajax');
+            $('body').append('<div class="lean-overlay"></div>');
+            let RequestId = $(this).data('id');
+            $.get('@Url.Action("GetAttachments", "CreditRequests")', { RequestId }, function (data) {
+                let filesHtml = '';
+                let messagesHtml = '';
+                console.log(data);
+                if (data.length > 0) {
+                    $('#Ov').val(data[0].ov);
+                }
+                $('#RequestId').val(RequestId);
+                data.forEach(requestInfo => {
+                    if (requestInfo.attachmentType == 1) {
+                        let fileExtension = requestInfo.fileUrl.split('/');
+                        fileExtension = fileExtension[fileExtension.length - 1].split('.')[1];
+                        filesHtml += `<div class="col-3 text-center pt-2"><a class="btn ${extensionFileIcon.hasOwnProperty(fileExtension) ? extensionFileIcon[fileExtension][1] : 'btn-outline-secondary'}" href="../InaxCorePruebas${requestInfo.fileUrl}" target="_blank" style="font-size:30px !important"><i class="fa ${extensionFileIcon.hasOwnProperty(fileExtension) ? extensionFileIcon[fileExtension][0] : 'fa-file'}"></i></a></div>`;
+                    } else {
+                        if (requestInfo.messageFrom == 1) {
+                            messagesHtml += `<div class="row justify-content-start">
+                                        <div class="col-10 m-0 p-0 pl-3">
+                                            <div class="row justify-content-start ml-1">
+                                                <div class="alert alert-secondary mb-1 mt-1 py-1" role="alert" style="max-width: 100%">
+                                                    ${requestInfo.message}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                        } else {
+                            messagesHtml += `<div class="row justify-content-end">
+                                            <div class="col-10 m-0 p-0">
+                                                <div class="row justify-content-end mr-1">
+                                                    <div class="alert alert-success mb-1 mt-1 py-1" role="alert" style="max-width: 100%">
+                                                        ${requestInfo.message}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>`;
+                        }
+                    }
+                });
+                console.log(filesHtml);
+                $('#filesBox').html(filesHtml);
+                $('#messageBox').html(messagesHtml);
+                $('body').removeClass('load-ajax');
+                $('body .lean-overlay').remove();
+                $('#requestInfoModal').modal('show');
+                $('#messageBox').animate({ scrollTop: document.body.scrollHeight }, "slow");
+            });
+        });
+
+        $('#sendMessage').click(function () {
+            let postInfo = {
+                Ov : $('#Ov').val(),
+                RequestId : $('#RequestId').val(),
+                Message : $('#messageInput').val(),
+                AttachmentType : 2,
+                MessageFrom : 2
+            }
+
+            $.post('@Url.Action("PostMessage", "CreditRequests")', postInfo, function (data) {
+                location.reload();
+            });
+        });
+
+        $('.createDiary').click(function () {
+            $('#diaryOv').val($(this).data('ov'));
+            $('#diaryAmmountInput').val($(this).data('ammount'));
+            $('#diaryClientCode').val($(this).data('clientcode'));
+            $('#requestId').val($(this).data('id'));
+            $('#createDiaryModal').modal('show');
+            @*$.get('@Url.Action("CreateDiary", "CreditRequests")', function (data) {
+                console.log(data);
+            });*@
+        });
+
+        $('#diaryForm').submit(function (e) {
+            e.preventDefault();
+            $('body').attr('data-msj', 'Procesando Petición ...');
+            $('body').addClass('load-ajax');
+            $('body').append('<div class="lean-overlay"></div>');
+            let diaryPostObject = {
+                Ov: $('#diaryOv').val(),
+                RequestId: $('#requestId').val(),
+                JournalName: $('#journalNameInput').val(),
+                DataAreaId: 'ATP',
+                DiaryAmmount: $('#diaryAmmountInput').val(),
+                DiarioCuentaContra: $('#diarioCuentaContraInput').val(),
+                DiarioFPago: '03',
+                TipoPago: $('#tipoPagoInput').val(),
+                PayReference: $('#payReferenceInput').val(),
+                ClientCode: $('#diaryClientCode').val()
+            }
+            $('#createDiaryModal').modal('hide');
+            $.post('@Url.Action("CreateDiary", "CreditRequests")', diaryPostObject, function (data) {
+                $('body').removeClass('load-ajax');
+                $('body .lean-overlay').remove();
+                if (data.success) {
+                    toastr.success(data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    toastr.danger(data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            });
+        });
+
+        $('.releaseOv').click(function () {
+            let Ov = $(this).data('ov');
+            let RequestId = $(this).data('id');
+            $('body').attr('data-msj', 'Procesando Petición ...');
+            $('body').addClass('load-ajax');
+            $('body').append('<div class="lean-overlay"></div>');
+            $.post('@Url.Action("ReleaseToWarehouse", "CreditRequests")', { Ov, RequestId }, function (data) {
+                $('body').removeClass('load-ajax');
+                $('body .lean-overlay').remove();
+                if (data.success) {
+                    toastr.success(data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    toastr.error(data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            });
+        });
+
+        $('.denyRequest').click(function () {
+            let requestId = $(this).data('id');
+            $.post('@Url.Action("DenyRequest", "CreditRequests")', { requestId }, function (data) {
+                if (data.success) {
+                    toastr.success(data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    toastr.error(data.message);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            });
+        });
+
+    </script>
+
+}

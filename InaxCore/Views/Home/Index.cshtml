@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container-fluid mx-0 my-5 pt-5">
+    <div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    </div>
+</div>
+
+
+@section Scripts{
+    <script>
+                if (localStorage.getItem('userInfo') == null) {
+                    $('body').attr('data-msj', 'Procesando Petición ...');
+                    $('body').addClass('load-ajax');
+                    $('body').append('<div class="lean-overlay"></div>');
+                $.get('@Url.Action("GetUserInfo", "Home")')
+                    .done((data) => {
+                        localStorage.setItem('userInfo', JSON.stringify(data));
+                        $('body').removeClass('load-ajax');
+                        $('body .lean-overlay').remove();
+                    });
+                }
+    </script>
+}
+

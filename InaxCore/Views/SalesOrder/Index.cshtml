@@ -1,0 +1,248 @@
+﻿
+@{
+    ViewData["Title"] = "Ordenes de venta";
+}
+
+    <div class="container-fluid mx-0 my-5 pt-5">
+        <div class="row">
+            <div class="col-3">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+        </div>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="tab1Action" data-toggle="tab" href="#tab1" role="tab" aria-controls="historical" aria-selected="false">Buscar en todas</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="tab2Action" data-toggle="tab" href="#tab2" role="tab" aria-controls="parcels" aria-selected="true">Mis Ventas</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active m-3" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+                <h5>Buscar por:</h5>
+                <div class="row mb-1">
+                    <div class="col-lg-3 col-md-4 col-sm-4">Orden de venta: <input type="text" id="byOvInput" class="small" /> <a class="btn btn-success btn-sm text-white" id="searchByOv"><span class="fa fa-search" aria-hidden="true"></span></a></div>
+                    <div class="col-lg-3 col-md-4 col-sm-4">Codigo Cliente: <input type="text" id="byCodeInput" class="small" /> <a class="btn btn-success btn-sm text-white" id="searchByCode"><span class="fa fa-search" aria-hidden="true"></span></a></div>
+                    <div class="col-lg-3 col-md-4 col-sm-4">Nombre Cliente: <input type="text" id="byNameInput" class="small" /> <a class="btn btn-success btn-sm text-white" id="searchByName"><span class="fa fa-search" aria-hidden="true"></span></a></div>
+                </div>
+                <table id="search_sales" class="table table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Orden de Venta</th>
+                            <th>Codigo Cliente</th>
+                            <th>Nombre Cliente</th>
+                            <th>Sitio</th>
+                            <th>Almacen</th>
+                            <th>Modo de Entrega</th>
+                            <th>Vendedor</th>
+                            <th>Estado de liberacion</th>
+                            <th>Estado de la Ov</th>
+                            <th width="10%">Acciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="tab-pane fade  m-3" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+                <table id="all_sales" class="table table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Orden de Venta</th>
+                            <th>Codigo Cliente</th>
+                            <th>Nombre Cliente</th>
+                            <th>Sitio</th>
+                            <th>Almacen</th>
+                            <th>Modo de Entrega</th>
+                            <th>Vendedor</th>
+                            <th>Estado de liberacion</th>
+                            <th>Estado de la Ov</th>
+                            <th width="10%">Acciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal fade" id="infoLinesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="orderInfoLinesTitle">Informacion: </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Codigo Articulo</th>
+                                    <th scope="col">Articulo</th>
+                                    <th scope="col">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableOrderLines">
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+        @section Scripts{
+            <script type="text/javascript">
+        @*$.get('@Url.Action("GetAll", "SalesOrder")')
+             .done((data) => {
+                 let parsedData = JSON.parse(data.data);
+                console.log(parsedData.value);
+            });*@
+        var parcelsTable = null;
+
+        $('#tab2Action').click(() => {
+            if (parcelsTable == null) {
+                $('body').attr('data-msj', 'Procesando Petición ...');
+                $('body').addClass('load-ajax');
+                $('body').append('<div class="lean-overlay"></div>');
+                parcelsTable = $('#all_sales').DataTable({
+                    "destroy": true,
+                    "ajax": {
+                        "url": "@Url.Action("GetMySales", "SalesOrder")",
+                        "type": "GET",
+                        "data": () => {
+                            let storageData = JSON.parse(localStorage.getItem('userInfo'));
+                            return { workerId: storageData.workerId, userName: storageData.userName };
+                        },
+                        "datatype": "json"
+                    },
+                    "columns": [
+                        { "data": "salesOrderNumber" },
+                        { "data": "invoiceCustomerAccountNumber" },
+                        { "data": "salesOrderName" },
+                        { "data": "defaultShippingSiteId" },
+                        { "data": "defaultShippingWarehouseId" },
+                        { "data": "deliveryModeCode" },
+                        { "data": "salesMan" },
+                        { "data": "releaseStatus" },
+                        { "data": "salesOrderStatus" },
+                        {
+                            "data": null,
+                            "render": function (data) {
+                                let actionsHtml = ``;
+                                actionsHtml += `<button class="btn btn-outline-success seeDetails mr-1" data-id="${data.salesOrderNumber}"><span class="fa fa-info" aria-hidden="true"></span></button>`;
+                                actionsHtml += `<button class="btn btn-outline-danger printPdf mr-1" data-id="${data.salesOrderNumber}"><span class="fa fa-file-pdf" aria-hidden="true"></span></button>`;
+                                if (data.salesOrderStatus == 'Invoiced')
+                                    actionsHtml += `<button class="btn btn-outline-secondary invoicePdf mr-1" data-id="${data.salesOrderNumber}"><span class="fa fa-file-code" aria-hidden="true"></span></button>`;
+                                return actionsHtml;
+                            }
+                        }
+                    ],
+                    "order": [[ 0, "desc" ]],
+                    "language": {
+                        "emptyTable": "no data found"
+                    },
+                    "width": "100%",
+                    "initComplete": () => {
+                        $('body').removeClass('load-ajax');
+                        $('body .lean-overlay').remove();
+                    }
+                });
+            }
+        });
+
+
+        function setSearchTable(value, filter) {
+            $('body').attr('data-msj', 'Procesando Petición ...');
+            $('body').addClass('load-ajax');
+            $('body').append('<div class="lean-overlay"></div>');
+            $('#search_sales').DataTable({
+                "destroy": true,
+                "ajax": {
+                    "url": "@Url.Action("GetByFilter", "SalesOrder")",
+                    "type": "GET",
+                    "data": {value,filter},
+                    "datatype": "json"
+                },
+                "columns": [
+                    { "data": "salesQuotationNumber"},
+                    { "data": "invoiceCustomerAccountNumber"},
+                    { "data": "salesOrderName" },
+                    { "data": "defaultShippingSiteId"},
+                    { "data": "defaultShippingWarehouseId"},
+                    { "data": "deliveryModeCode"},
+                    { "data": "salesMan"},
+                    { "data": "releaseStatus"},
+                    { "data": "salesOrderStatus"},
+                    {
+                        "data": null,
+                        "render": function (data) {
+                            let actionsHtml = ``;
+                            actionsHtml += `<button class="btn btn-outline-success seeDetails mr-1" data-id="${data.salesOrderNumber}"><span class="fa fa-info" aria-hidden="true"></span></button>`;
+                            actionsHtml += `<button class="btn btn-outline-danger printPdf mr-1" data-id="${data.salesOrderNumber}"><span class="fa fa-file-pdf" aria-hidden="true"></span></button>`;
+                            if (data.salesOrderStatus == 'Invoiced')
+                                actionsHtml += `<button class="btn btn-outline-secondary invoicePdf mr-1" data-id="${data.salesOrderNumber}"><span class="fa fa-file-code" aria-hidden="true"></span></button>`;
+                            return actionsHtml;
+                        }
+                    }
+                ],
+                "order": [[ 0, "desc" ]],
+                "language": {
+                    "emptyTable": "no data found"
+                },
+                "width": "100%",
+                "initComplete": () => {
+                    $('body').removeClass('load-ajax');
+                    $('body .lean-overlay').remove();
+                }
+        });
+        }
+
+        $('#searchByOv').click(() => {
+            let inputValue = $('#byOvInput').val();
+            setSearchTable(inputValue, 'ov');
+            $('#byOvInput').val('');
+        });
+        $('#searchByCode').click(() => {
+            let inputValue = $('#byCodeInput').val();
+            setSearchTable(inputValue, 'code');
+            $('#byCodeInput').val('');
+        });
+        $('#searchByName').click(() => {
+            let inputValue = $('#byNameInput').val();
+            setSearchTable(inputValue, 'name');
+            $('#byNameInput').val('');
+        });
+
+        $(document).on('click', '.seeDetails', function () {
+            let id = $(this).data('id');
+            $('body').attr('data-msj', 'Procesando Petición ...');
+            $('body').addClass('load-ajax');
+            $('body').append('<div class="lean-overlay"></div>');
+            $.get('@Url.Action("GetOvInfo", "SalesOrder")', { ov : id }).done((data) => {
+                console.log(data);
+                let tableHtml = '';
+                data.forEach((item, index) => {
+                    tableHtml += `<tr>`;
+                    tableHtml += `<th scope="row">${++index}</th>`;
+                    tableHtml += `<th>${item.itemId}</th>`;
+                    tableHtml += `<th>${item.name}</th>`;
+                    tableHtml += `<th>${item.salesQty} ${item.salesUnit}</th>`;
+                    tableHtml += `</tr>`;
+                });
+                $('#tableOrderLines').html(tableHtml);
+                $('#orderInfoLinesTitle').html(`Información: ${id}`);
+                $('#infoLinesModal').modal('toggle');
+                $('body').removeClass('load-ajax');
+                $('body .lean-overlay').remove();
+            });
+        });
+
+            </script>
+        }

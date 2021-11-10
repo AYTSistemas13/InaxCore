@@ -1,0 +1,162 @@
+﻿@model CreditRequestModel
+@{
+    ViewData["Title"] = "Datos Solicitud";
+    Dictionary<string, string[]> extensionFileIcon = new Dictionary<string, string[]>() {
+        {"png", new string[] {"fa-file-image", "btn-outline-secondary" } },
+        {"jpg", new string[] {"fa-file-image", "btn-outline-secondary" } },
+        {"jpeg", new string[] {"fa-file-image", "btn-outline-secondary" } },
+        {"gif", new string[] {"fa-file-image", "btn-outline-secondary" } },
+        {"pdf", new string[] {"fa-file-pdf", "btn-outline-danger" } },
+        {"doc", new string[] {"fa-file-word", "btn-outline-primary" } },
+        {"docx", new string[] {"fa-file-word", "btn-outline-primary" } },
+        {"odt", new string[] {"fa-file-word", "btn-outline-primary" } }
+    };
+}
+
+<div class="container-fluid mx-0 my-5 pt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1>@ViewData["Title"] </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class=" col-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        Archivos
+                        <div class="col-11 d-flex justify-content-end">
+                            <button class="btn btn-primary" style="font-size: 16px !important;" id="uploadFiles"><i class="fa fa-file-upload"></i> Subir Archivos</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" style="min-height: 200px">
+                    <form action="@Url.Action("UploadFiles", "CreditRequests")" method="POST" enctype="multipart/form-data" class="dropzone" style="max-height: 400px !important; overflow-y: scroll;">
+                        <input type="hidden" name="Ov" id="Ov" value="@Model.Ov" />
+                        <input type="hidden" name="RequestId" id="RequestId" value="@Model.Id" />
+                        <input type="hidden" name="AttachmentType" value="1" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class=" col-4">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fa fa-comment-alt"></i> Comentarios
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="pr-4 pr-4" id="messageBox" style="height: 300px; overflow-y: scroll;">
+                                @foreach (CreditReqAttachmentModel requestAttachment in ViewData["requestAttachments"] as List<CreditReqAttachmentModel>)
+                                {
+                                    if (requestAttachment.AttachmentType == 1) continue;
+                                    if (requestAttachment.MessageFrom == 2)
+                                    {
+                                        <div class="row justify-content-start">
+                                            <div class="col-10 m-0 p-0 pl-3">
+                                                <div class="row justify-content-start ml-1">
+                                                    <div class="alert alert-secondary mb-1 mt-1 py-2" role="alert" style="max-width: 100%">
+                                                        @requestAttachment.Message
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    }
+                                    else
+                                    {
+                                        <div class="row justify-content-end">
+                                            <div class="col-10 m-0 p-0">
+                                                <div class="row justify-content-end mr-1">
+                                                    <div class="alert alert-success mb-1 mt-1 py-2" role="alert" style="max-width: 100%">
+                                                        @requestAttachment.Message
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                }
+                            </div>
+                            <div class="row my-1 pl-4" style="width: 100%;">
+                                <div class="col-11" style="padding: 0;"><input type="text" class="form-control" placeholder="Escribe Algo.." id="messageInput" /></div>
+                                <div class="col-1" style="padding: 0;"><button class="btn btn-outline-primary" id="sendMessage"><i class="fa fa-paper-plane"></i></button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row pt-2">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            Documentos
+                        </div>
+                        <div class="card-body" style="max-height: 200px; overflow-y: scroll;">
+                            <div class="row">
+                                @foreach (CreditReqAttachmentModel requestAttachment in ViewData["requestAttachments"] as List<CreditReqAttachmentModel>)
+                                {
+                                    string fileExtension = requestAttachment.FileUrl.Split("/").Last().Split(".").Last();
+                                    string fileColor = extensionFileIcon.ContainsKey(fileExtension) ? extensionFileIcon[fileExtension][1] : "btn-outline-secondary";
+                                    string fileIcon = extensionFileIcon.ContainsKey(fileExtension) ? extensionFileIcon[fileExtension][0] : "fa-file";
+                                    if (requestAttachment.AttachmentType == 2) continue;
+                                    <div class="col-3 text-center pt-2"><a class="btn @fileColor" href="../..@requestAttachment.FileUrl" target="_blank" style="font-size:30px !important"><i class="fa @fileIcon"></i></a></div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts{
+
+    <script>
+        Dropzone.autoDiscover = false;
+        var myDropzone = new Dropzone('.dropzone', {
+            dictDefaultMessage: '<h4>Arrastre archivos o de click aqui para subirlos</h4>',
+            dictRemoveFile: 'Eliminar Archivo',
+            parallelUploads: 20,
+            addRemoveLinks: true,
+            duplicateCheck: true,
+            autoProcessQueue: false,
+            uploadMultiple: true
+        });
+
+        $('#messageBox').animate({ scrollTop: document.body.scrollHeight }, "slow");
+
+        $('#uploadFiles').click(function () {
+            myDropzone.processQueue();
+        });
+
+        myDropzone.on("queuecomplete", function (file) {
+            toastr.success('Carga Completada');
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        });
+
+
+        $('#sendMessage').click(function () {
+            let postInfo = {
+                Ov : $('#Ov').val(),
+                RequestId : $('#RequestId').val(),
+                Message : $('#messageInput').val(),
+                AttachmentType : 2,
+                MessageFrom : 1
+            }
+
+            $.post('@Url.Action("PostMessage", "CreditRequests")', postInfo, function (data) {
+                location.reload();
+            });
+        });
+
+    </script>
+
+}

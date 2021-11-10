@@ -1,0 +1,51 @@
+﻿@model int
+
+@{ 
+    string display = Model != 1 ? "display:none;" : "";
+}
+    
+<form id="saleForm-@Model" style="@display max-height:65vh;overflow-y:scroll;">
+        <table class="table" id="">
+            <thead>
+                <tr style="font-size:.8em;" class="text-center">
+                    <th width="1%">#</th>
+                    <th width="10%">Codigo Articulo</th>
+                    <th width="10%">Nombre Articulo</th>
+                    <th width="2%">Qty</th>
+                    <th width="3%">Unidad</th>
+                    <th width="3%">Sitio</th>
+                    <th width="3%">Alm</th>
+                    <th width="6%">Lote</th>
+                    <th width="6%">Localidad</th>
+                    <th width="6%">Matricula</th>
+                    <th width="6%">Categoria</th>
+                    <th width="3%">Cargo</th>
+                    <th width="3%">Precio + IVA</th>
+                    <th width="3%">Monto + Cargo</th>
+                    <th width="3%">Monto + IVA</th>
+                </tr>
+            </thead>
+            <tbody class="linesBody">
+                <tr class="lineObject" style="z-index:1;">
+                    <th scope="row" class="p-0"><input type="checkbox" aria-label="Checkbox for following text input"> 1</th>
+                    <td class="p-0"><input id="itemCode" name="itemCode" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder="Codigo Articulo/Nombre"></td>
+                    <td class="p-0"><input id="itemName" name="itemName" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemQuantity" name="itemQuantity" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemUnit" name="itemUnit" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemSite" name="itemSite" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemWarehouse" name="itemWarehouse" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemLot" name="itemLot" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemLocation" name="itemLocation" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemPlate" name="itemPlate" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemCategory" name="itemCategory" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemCharge" name="itemCharge" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemTaxPrice" name="itemTaxPrice" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemAmmountCharge" name="itemAmmountCharge" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemTaxAmmount" name="itemTaxAmmount" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="text-right" style="position: fixed;top: 25.5%;right: 5px;width: 7%;">
+            <button type="button" data-id="#saleForm-@Model" class="btn btn-success addLine"><i class="fa fa-plus"></i></button>
+        </div>
+    </form>

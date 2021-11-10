@@ -1,0 +1,159 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"] - InaxCore</title>
+  <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="~/css/site.css" />
+  <link rel="stylesheet" href="~/css/dropzone.css" />
+  <link rel="stylesheet" href="~/css/multi-select.css" />
+  <link rel="stylesheet" href="~/css/selectize.css" />
+  <link rel="stylesheet" href="~/css/custom.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous" />
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+  <div class="container-fluid">
+    <div id="main-content" class="col-lg-12 m-0 col-md-12 p-0">
+      <div class="content">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white fixed-top  border-bottom box-shadow mb-3">
+          <div class="container-fluid">
+            <a class="navbar-brand pl-3" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/img/avance-logo-wname.jpg" style="max-height:35px;" /></a>
+            <button class="navbar-toggler" id="sidebarCollapse" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+              <partial name="_LoginPartial" />
+              <ul class="navbar-nav flex-grow-1">
+                @*<li class="nav-item text-center fast-Link">
+                      <a class="nav-link text-dark" asp-area="" asp-controller="CreateSale" asp-action="Index"><i class="fa fa-shopping-cart"></i></a>
+                  </li>
+                  <li class="nav-item text-center mr-2 fast-Link ">
+                      <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa fa-users"></i></a>
+                  </li>
+                  <li class="nav-item text-center mr-2 fast-Link">
+                      <a class="nav-link text-dark" asp-area="" asp-controller="SalesOrder" asp-action="Index"><i class="fa fa-file-invoice-dollar"></i></a>
+                  </li>
+                  <li class="nav-item text-center mr-2 fast-Link">
+                      <a class="nav-link text-dark" asp-area="" asp-controller="QuotationsInfo" asp-action="Index"><i class="fa fa-book"></i></a>
+                  </li>*@
+                <li class="nav-item text-center mr-2 fast-Link">
+                  <a class="nav-link text-dark" asp-area="" asp-controller="PromoCodes" asp-action="Index" title="Códigos Promocionales"><i class="fa fa-percentage"></i></a>
+                </li>
+                <li class="nav-item text-center mr-2 fast-Link">
+                  <a class="nav-link text-dark" asp-area="" asp-controller="CreditRequests" asp-action="Index" title="Credito/Transferencias"><i class="fa fa-credit-card"></i></a>
+                </li>
+                <li class="nav-item text-center mr-2 fast-Link">
+                  <a class="nav-link text-dark" asp-area="" asp-controller="Lotes" asp-action="viewLote" title="Caducidades Tintas"><i class="fa fa-tags"></i></a>
+                </li>
+                <li class="nav-item text-center mr-2 fast-Link">
+                  <a class="nav-link text-dark" asp-area="" asp-controller="AdminHV" asp-action="Index" title="Administrador de Herramienta de Ventas"><i class="fa fa-toggle-off"></i></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+        <main role="main" class="pb-3">
+          @RenderBody()
+        </main>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <footer class="border-top footer text-muted">
+    <div class="container">
+      &copy; 2020 - InaxCore - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    </div>
+  </footer>
+  <script src="~/lib/jquery/dist/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="~/js/site.js" asp-append-version="true"></script>
+  <script src="~/js/AdminHV.js" asp-append-version="true"></script>
+  <script src="~/js/dropzone.min.js" asp-append-version="true"></script>
+  <script src="~/js/jquery.multi-select.js" asp-append-version="true"></script>
+  <script src="~/js/jquery.quicksearch.js" asp-append-version="true"></script>
+  <script src="~/js/tokenize2.min.js" asp-append-version="true"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/datatables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script>
+    $(document).ready(function () {
+      $("#sidebar").mCustomScrollbar({
+        theme: "minimal"
+      });
+      $('[data-toggle="tooltip"]').tooltip();
+      $('#sidebarCollapse2').on('click', function () {
+        // open or close navbar
+        console.log('dentro perro');
+        $('#sidebar').toggleClass('active');
+        // close dropdowns
+        $('.collapse.in').toggleClass('in');
+        $(this).hide();
+        if ($('#sidebar').hasClass('active')) {
+          console.log('notiene');
+          $('#main-content').removeClass('col-lg-11');
+          $('#main-content').addClass('col-lg-12');
+          $('#side-content').removeClass('col-lg-1');
+          $('#side-content').addClass('col-lg-0');
+          $('#sidebarCollapse3').show();
+        } else {
+          console.log('sitiene');
+          $('#main-content').removeClass('col-lg-12');
+          $('#main-content').addClass('col-lg-11');
+          $('#side-content').removeClass('col-lg-0');
+          $('#side-content').addClass('col-lg-1');
+        }
+
+        // and also adjust aria-expanded attributes we use for the open/closed arrows
+        // in our CSS
+        $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+      });
+      $('#sidebarCollapse3').on('click', function () {
+        // open or close navbar
+        console.log('dentro perro');
+        $('#sidebar').toggleClass('active');
+        // close dropdowns
+        $('.collapse.in').toggleClass('in');
+        $(this).hide();
+        if ($('#sidebar').hasClass('active')) {
+          console.log('notiene');
+          $('#main-content').removeClass('col-lg-11');
+          $('#main-content').addClass('col-lg-12');
+          $('#side-content').removeClass('col-lg-1');
+          $('#side-content').addClass('col-lg-0');
+        } else {
+          console.log('sitiene');
+          $('#main-content').removeClass('col-lg-12');
+          $('#main-content').addClass('col-lg-11');
+          $('#side-content').removeClass('col-lg-0');
+          $('#side-content').addClass('col-lg-1');
+          $('#sidebarCollapse2').show();
+        }
+
+        // and also adjust aria-expanded attributes we use for the open/closed arrows
+        // in our CSS
+        $('a[aria-expanded=true]').attr('aria-expanded', 'false');
+      });
+
+    });
+  </script>
+  @RenderSection("Scripts", required: false)
+</body>
+</html>

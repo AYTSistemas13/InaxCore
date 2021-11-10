@@ -1,0 +1,341 @@
+﻿@model PromoCodeInfo
+@{
+    ViewData["Title"] = "Modificar Código";
+}
+
+<div class="container-fluid mx-0 my-5 pt-5">
+    <div class="row">
+        <div class="col-2">
+            <div class="form-group">
+                <input type="hidden" class="form-control" id="promoCodeId" value="@Model.Id">
+                <label for="promoCodeInput">Código Promocional</label>
+                <input type="text" class="form-control" id="promoCodeInput" placeholder="Ejemplo: EMPRENDEDOR2021" value="@Model.PromoCode">
+                <small id="promoCodeInputSmall" class="form-text text-muted">Puedes generar el código que desees.</small>
+            </div>
+            <div class="form-group">
+                <label for="siteSelector">Selecciona familia</label>
+                <select id="familySelector" name="familySelected[]" multiple placeholder="Selecciona las familias">
+                    @{
+                        Console.WriteLine(Model.ItemsList);
+                        var familiesList = Model.FamiliesSelected.Split(",");
+
+                    }
+                    @foreach (ItemFamily family in ViewData["familyList"] as List<ItemFamily>)
+                    {
+
+                        if (familiesList.Contains(family.FamilyName))
+                        {
+                            <option value='@family.FamilyName' selected>@family.FamilyName</option>
+                        }
+                        else
+                        {
+                            <option value='@family.FamilyName'>@family.FamilyName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <button type="button" id="filterByFamily" class="btn btn-primary">Filtrar</button>
+            <div class="form-group">
+                <label for="startDate">Fecha de inicio</label>
+                <input id="startDate" type="date" min="1000-01-01"
+                       max="3000-12-31" class="form-control" value="@String.Format("{0:yyyy-MM-dd}", Model.StartDate)">
+            </div>
+            <div class="form-group">
+                <label for="expirationDate">Fecha de expiración</label>
+                <input id="expirationDate" type="date" min="1000-01-01"
+                       max="3000-12-31" class="form-control" value="@String.Format("{0:yyyy-MM-dd}", Model.ExpireDate)">
+            </div>
+            <div class="form-group">
+                <label for="siteSelector">Selecciona sitio</label>
+                <select id="siteSelector" name="siteSelected[]" multiple placeholder="Selecciona los sitios">
+                    @{
+                        Console.WriteLine(Model.ItemsList);
+                        var sitesList = Model.SiteId.Split(",");
+                    }
+                    @foreach (StoreSite site in ViewData["sitesArray"] as List<StoreSite>)
+                    {
+                        if (sitesList.Contains(site.siteId))
+                        {
+                            <option value='@site.siteId' selected>@site.siteName</option>
+                        }
+                        else
+                        {
+                            <option value='@site.siteId'>@site.siteName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <button type="button" id="createCode" class="btn btn-primary">Actualizar</button>
+        </div>
+        <div class="col-10">
+            <table class="table table-bordered" id="itemsTable">
+                <thead>
+                    <tr>
+                        <th width="15%">Artículo</th>
+                        <th width="60%">Nombre</th>
+                        <th width="10%">% Desc.</th>
+                        <th width="15%">C. Mínima</th>
+                    </tr>
+                </thead>
+                <tbody id="itemsTableBody"></tbody>
+            </table>
+        </div>
+        @*<div class="col-5">
+                <label for="relationSelect">Selecciona articulos</label>
+                <select class="searchable" id="relationSelect" multiple="multiple" name="itemsSelect[]">
+                    @{
+                        Console.WriteLine(Model.ItemsList);
+                        var articlesList = Model.ItemsList.Split(",");
+
+                    }
+                    @foreach (ArticleInfo article in ViewData["articlesList"] as List<ArticleInfo>)
+                    {
+                        if (articlesList.Contains(article.ItemNumber))
+                        {
+                            <option value='@article.ItemNumber' selected>@article.ItemNumber - @article.SearchName</option>
+                        }
+                        else
+                        {
+                            <option value='@article.ItemNumber'>@article.ItemNumber - @article.SearchName</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-5" id="customerDiv" >
+                <select id="customerSelect" name="customersSelect[]" multiple="multiple">
+                   @foreach(CustomerInfo customer in ViewData["customerList"] as List<CustomerInfo>)
+                   {
+                    <option value='@customer.CustomerAccount'>@customer.OrganizationName</option>
+                   }
+                </select>
+            </div>*@
+    </div>
+</div>
+
+@section Scripts{
+<script>
+    var currentMultiselect = null;
+    console.log('@Model.ItemsList');
+    var currentItemsSelected = JSON.parse('@Model.ItemsList'.replace(/&quot;/g, '"'));
+    var itemsDataTable = null;
+    $(document).ready(function () {
+        $('#familySelector').selectize();
+        $('#filterByFamily').click();
+    });
+    $(document).ready(function () {
+        $('#siteSelector').selectize();
+    });
+
+    $('#createCode').click(() => {
+        if ($('#promoCodeInput').val() == '') {
+            toastr.warning('Favor de ingresar el código promocional');
+            return;
+        } else if ($('#promoCodeInput').val().length > 20) {
+            toastr.warning('El nombre no debe de tener un máximo de 20 caracteres');
+            return;
+        }
+        if ($('#familySelector').val().length <= 0) {
+            toastr.warning('Favor de ingresar al menos una familia');
+            return;
+        }
+        if ($('#siteSelector').val().length <= 0) {
+            toastr.warning('Favor de ingresar al menos un sitio');
+            return;
+        }
+        if ($('#expirationDate').val() == '') {
+            toastr.warning('Favor de ingresar la fecha de expiración');
+            return;
+        }
+        if ($('#startDate').val() == '') {
+            toastr.warning('Favor de ingresar la fecha de inicio');
+            return;
+        }
+        $('input[type=search]').val('');
+        itemsDataTable.search('').draw();
+        let itemsList = {};
+        let itemDiscountList = $('.itemDiscount');
+        let itemMinQuantityList = $('.itemMinQuantity');
+        $.each(itemDiscountList, (index, value) => {
+            if ($(value).val() == '') return;
+            itemsList[$(value).data('id')] = {};
+            itemsList[$(value).data('id')].itemDiscount = $(value).val();
+        });
+        $.each(itemMinQuantityList, (index, value) => {
+            if ($(value).val() == '') return;
+            console.log($(value).data('id'));
+            if (itemsList[$(value).data('id')]) {
+                itemsList[$(value).data('id')].itemMinQuantity = $(value).val();
+            }
+        });
+        if (Object.keys(itemsList).length <= 0) {
+            toastr.warning('Favor de configurar por lo menos un artículo');
+            return;
+        }
+        let promoCode = $('#promoCodeInput').val();
+        let expireDate = $('#expirationDate').val();
+        let startDate = $('#startDate').val();
+        let siteId = $('#siteSelector').val().toString();
+        let promoCodeId = $('#promoCodeId').val();
+        let familiesSelected = $('#familySelector').val().toString();
+        $.post('@Url.Action("UpdatePromoCode", "PromoCodes")', { Id: promoCodeId, promoCode, itemsList: JSON.stringify(itemsList), startDate, expireDate, siteId, familiesSelected }).done((data) => {
+            if (data.success) {
+                toastr.success('Se actualizó el código promocional');
+                setInterval(location.replace('@Url.Action("Index", "PromoCodes")'),3000);
+            }
+        });
+    });
+
+    $('#filterByFamily').click(() => {
+        let familyList = $('#familySelector').val();
+        if (familyList.length <= 0) {
+            toastr.warning('Favor de ingresar al menos una familia');
+            return;
+        }
+        $('body').attr('data-msj', 'Procesando Petición ...');
+        $('body').addClass('load-ajax');
+        $('body').append('<div class="lean-overlay"></div>');
+        if (itemsDataTable != null) {
+            itemsDataTable.destroy();
+            $('#itemsTable tbody').html('');
+            //let itemsList = {};
+            let itemsList = JSON.parse('@Model.ItemsList'.replace(/&quot;/g, '"'));
+            let itemDiscountList = $('.itemDiscount');
+            let itemMinQuantityList = $('.itemMinQuantity');
+            $.each(itemDiscountList, (index, value) => {
+                if ($(value).val() == '') return;
+                itemsList[$(value).data('id')] = {};
+                itemsList[$(value).data('id')].itemDiscount = $(value).val();
+            });
+            $.each(itemMinQuantityList, (index, value) => {
+                if ($(value).val() == '') return;
+                console.log($(value).data('id'));
+                if (itemsList[$(value).data('id')]) {
+                    itemsList[$(value).data('id')].itemMinQuantity = $(value).val();
+                }
+            });
+            currentItemsSelected = itemsList;
+            $.get('@Url.Action("GetItemsFamily", "PromoCodes")', { familyList: Object.assign({}, familyList) }).done((data) => {
+                $.each(data.message, (key, value) => {
+                    if (currentItemsSelected[value.itemNumber]) {
+                        $('#itemsTableBody').prepend(`<tr class='bg-success text-white'>
+                        <td width="15%">${value.itemNumber}</td>
+                        <td width="60%">${value.searchName}</td>
+                        <td width="10%"><input type='number' class='form-control itemDiscount' data-id='${value.itemNumber}' onchange='verifyInputs(this)' style='border:0!important;' placeholder='ej. 10' value='${currentItemsSelected[value.itemNumber].itemDiscount}'></input></td>
+                        <td width="15%"><input type='number' class='form-control itemMinQuantity' data-id='${value.itemNumber}' onchange='verifyInputs(this)' style='border:0!important;' placeholder='ej. 10' value='${currentItemsSelected[value.itemNumber].itemMinQuantity}'></input></td>
+                        </tr>`);
+                    } else {
+                        $('#itemsTableBody').append(`<tr>
+                        <td width="15%">${value.itemNumber}</td>
+                        <td width="60%">${value.searchName}</td>
+                        <td width="10%"><input type='number' class='form-control itemDiscount' data-id='${value.itemNumber}' onchange='verifyInputs(this)' style='border:0!important;' placeholder='ej. 10'></input></td>
+                        <td width="15%"><input type='number' class='form-control itemMinQuantity' data-id='${value.itemNumber}' onchange='verifyInputs(this)' style='border:0!important;' placeholder='ej. 10' value='0'></input></td>
+                        </tr>`);
+                    }
+                });
+                itemsDataTable = $('#itemsTable').DataTable({
+                    "order": [],
+                    "scrollY": "60vh",
+                    "scrollCollapse": true,
+                    "paging": false,
+                    "responsive": true,
+                    "destroy": true,
+                });
+                $('body').removeClass('load-ajax');
+                $('body .lean-overlay').remove();
+            });
+        } else {
+            $.get('@Url.Action("GetItemsFamily", "PromoCodes")', { familyList: Object.assign({}, familyList) }).done((data) => {
+                $.each(data.message, (key, value) => {
+                    if (currentItemsSelected[value.itemNumber]) {
+                        $('#itemsTableBody').prepend(`<tr class='bg-success text-white'>
+                        <td width="15%">${value.itemNumber}</td>
+                        <td width="60%">${value.searchName}</td>
+                        <td width="10%"><input type='number' class='form-control itemDiscount' data-id='${value.itemNumber}' onchange='verifyInputs(this)' style='border:0!important;' placeholder='ej. 10' value='${currentItemsSelected[value.itemNumber].itemDiscount}'></input></td>
+                        <td width="15%"><input type='number' class='form-control itemMinQuantity' data-id='${value.itemNumber}' onchange='verifyInputs(this)' style='border:0!important;' placeholder='ej. 10' value='${currentItemsSelected[value.itemNumber].itemMinQuantity}'></input></td>
+                        </tr>`);
+                    } else {
+                        $('#itemsTableBody').append(`<tr>
+                        <td width="15%">${value.itemNumber}</td>
+                        <td width="60%">${value.searchName}</td>
+                        <td width="10%"><input type='number' class='form-control itemDiscount' data-id='${value.itemNumber}' onchange='verifyInputs(this)' style='border:0!important;' placeholder='ej. 10'></input></td>
+                        <td width="15%"><input type='number' class='form-control itemMinQuantity' data-id='${value.itemNumber}' onchange='verifyInputs(this)' style='border:0!important;' placeholder='ej. 10' value='0'></input></td>
+                        </tr>`);
+                    }
+                });
+                itemsDataTable = $('#itemsTable').DataTable({
+                    "order": [],
+                    "scrollY": "60vh",
+                    "scrollCollapse": true,
+                    "paging": false,
+                    "responsive": true,
+                    "destroy": true,
+                });
+                $('body').removeClass('load-ajax');
+                $('body .lean-overlay').remove();
+            });
+        }
+    });
+
+    function verifyInputs(element) {
+        if ($(element).hasClass('itemDiscount')) {
+            if ($(element).val() > 100) {
+                toastr.warning('El descuento no puede sobrepasar el 100%');
+                $(element).val(100)
+            }
+        }
+        let trElement = $(element).parent().parent();
+        let minQuantityItem = $(element).parent().siblings().last()[0];
+        minQuantityItem = $(minQuantityItem).children()[0];
+        console.log($(element).val());
+        if ($(element).val() == '') {
+            if ($(trElement).hasClass('bg-success text-white')) {
+                $(trElement).removeClass('bg-success text-white');
+            }
+            return;
+        }
+        if ($(minQuantityItem).val() != '') {
+            console.log($(element).parent().parent());
+            $(trElement).addClass('bg-success text-white');
+        } else {
+            if ($(trElement).hasClass('bg-success text-white')) {
+                $(trElement).removeClass('bg-success text-white');
+            }
+        }
+    }
+
+    var items = []
+    $('#siteSelector').on('change', function () {
+        if ($(this).hasClass('selectized')) {
+            if (this.value == 'All') {
+                var control = $('#siteSelector')[0].selectize
+                control.destroy()
+                control._events = { change: [] };
+                $('#siteSelector').prop('multiple', false)
+                $('#siteSelector').val('All')
+                $('#siteSelector').selectize()
+                items = []
+            } else {
+                var control = $('#siteSelector')[0].selectize
+                if (control.items.includes('All')) {
+                    control.destroy()
+                    control._events = { change: [] };
+                    $('#siteSelector').prop('multiple', false)
+                    $('#siteSelector').val('All')
+                    $('#siteSelector').selectize()
+                    items = []
+                } else {
+                    control = $('#siteSelector')[0].selectize
+                    items = control.items
+                    control.destroy()
+                    control._events = { change: [] };
+                    $('#siteSelector').prop('multiple', 'multiple')
+                    $('#siteSelector').val(items)
+                    $('#siteSelector').selectize()
+                    //console.log(control.items)
+                }
+            }
+        }
+    })
+
+</script>
+}

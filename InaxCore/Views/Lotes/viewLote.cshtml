@@ -1,0 +1,104 @@
+﻿
+@{
+    ViewData["Title"] = "Fechas de Lotes TINTAS";
+}
+
+<div class="container-fluid mx-0 my-5 pt-5">
+    <div class="row">
+        <div class="col-4">
+            <h1>@ViewData["Title"] </h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3" style="text-align:right">
+            <h1>Buscar Lote: </h1>
+        </div>
+        <div class="col-md-4" style="padding-top: 13px;">
+            <input class="div" id="txtcodigo" type="text" name="buscar">
+        </div>
+        <div class="col-md-2">
+            <button class="button" id="BuscarCodebtn" type="button">Buscar</button>
+        </div>
+        <div class="col-md-4">
+           &nbsp;
+        </div>
+    </div>
+    <table id="tableLote" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+            <tr>
+                <th>Código de artículo</th>
+                <th>Fecha de Caducidad</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts{
+
+    <script type="text/javascript">
+        $('#BuscarCodebtn').click(() => {
+            var parcelsTable = null;
+            if (parcelsTable == null) {
+                var Code = $('#txtcodigo').val();
+                if (parcelsTable == null) {
+                    parcelsTable = $('#tableLote').DataTable({
+                        "destroy": true,
+                        "ajax": {
+                            "url": "@Url.Action("GetItems", "Lotes")",
+                            "type": "GET",
+                            "data": {
+                                Code: Code
+                            },
+                            "datatype": "json"
+                        },
+                        "columns": [
+                            { "data": "itemId" },
+                            { "data": "expDate" },
+                            { "data": "estado" },
+                        ],
+                        "order": [[0, "desc"]],
+                        "language": {
+                            "emptyTable": "no data found"
+                        },
+                        "width": "100%",
+                        "initComplete": () => {
+                            $('body').removeClass('load-ajax');
+                            $('body .lean-overlay').remove();
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+    @*<script type="text/javascript">
+            var meses = new Array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
+            var diasSemana = new Array("Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado");
+            var datetoday = new Date();
+            document.write(diasSemana[datetoday.getDay()] + ", " + datetoday.getDate() + " de " + meses[datetoday.getMonth()] + " de " + datetoday.getFullYear());
+        </script>*@
+<style>
+    .button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+    }
+    .div {
+        font-size: 20px !important;
+
+        width: 100%;
+        height: 30px;
+        border: 1px solid green;
+        box-sizing: border-box;
+    }
+</style>
+}

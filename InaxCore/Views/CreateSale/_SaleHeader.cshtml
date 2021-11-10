@@ -1,0 +1,87 @@
+﻿@using InaxCore.Models.ViewModels
+@model CreateSaleHeaderViewModel
+
+@{
+    string display = Model.HeaderIndex != 1 ? "display:none;" : "";
+}
+
+    <div class="container-fluid index-menu active" id="saleHeader-@Model.HeaderIndex" style="@display">
+        <div class="disable-div active-div" style="@display" id="disbaleDiv-@Model.HeaderIndex"></div>
+        <form method="post" id="headerForm-@Model.HeaderIndex" class="row bg-dark pt-3 m-0 salesToggleBar activeBar">
+            <div class="col-11">
+                <div class="row">
+                    <div class="col-2">
+                        <input type="text" id="clientCode-@Model.HeaderIndex" data-index="@Model.HeaderIndex" name="clientCode" class="form-control form-control-sm" style="border-style: none;" placeholder="Codigo/Nombre Cliente">
+                    </div>
+                    <div class="col-3">
+                        <input type="text" id="clientName-@Model.HeaderIndex" name="clientName" class="form-control form-control-sm" style="border-style: none;" placeholder="Nombre entrega">
+                    </div>
+                    <div class="col-2">
+                        <input type="text" id="clientType-@Model.HeaderIndex" name="clientType" class="form-control form-control-sm" style="border-style: none;" placeholder="Condiciones de entrega">
+                    </div>
+                    <div class="col-2">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="btn input-group-text" id="salesOrigin-@Model.HeaderIndex" name="salesOrigin" for="inputGroupSelect01">Origen</label>
+                            </div>
+                            <select class="custom-select">
+                                @foreach (SalesOrigin saleOrigin in Model.SalesOriginList)
+                                {
+                                    <option value="@saleOrigin.OriginId">@saleOrigin.Description</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="btn input-group-text" for="inputGroupSelect01">Responsable</label>
+                            </div>
+                            <select id="orderResponsible-@Model.HeaderIndex" name="orderResponsible" class="custom-select">
+                                @foreach (EmployeeInfo employee in Model.EmployeeInfoList)
+                                {
+                                    if (employee.Name == "Admin Admin" || employee.Name == "WMSAPP" || employee.Name == "Staff 02") continue;
+                                    <option value="@employee.PersonnelNumber">@employee.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        <input type="text" id="clientAddress-@Model.HeaderIndex" name="clientAddress" class="form-control form-control-sm" style="border-style: none;" placeholder="Direccion">
+                    </div>
+                    <div class="col-3">
+                        <input type="text" id="saleComents-@Model.HeaderIndex" name="saleComents" class="form-control form-control-sm" style="border-style: none;" placeholder="Comentarios">
+                    </div>
+                    <div class="col-2">
+                        <input type="text" id="clientOrder-@Model.HeaderIndex" name="clientOrder" class="form-control form-control-sm" style="border-style: none;" placeholder="Orden del Cliente">
+                    </div>
+                    <div class="col-2">
+                        <input type="text" id="clientReference-@Model.HeaderIndex" name="clientReference" class="form-control form-control-sm" style="border-style: none;" placeholder="Referencia del Cliente">
+                    </div>
+                    <div class="col-3">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="btn input-group-text" for="inputGroupSelect01">Secretario</label>
+                            </div>
+                            <select id="orderSecretary-@Model.HeaderIndex" name="orderSecretary" class="custom-select">
+                                @foreach (EmployeeInfo employee in Model.EmployeeInfoList)
+                                {
+                                    if (employee.Name == "Admin Admin" || employee.Name == "WMSAPP" || employee.Name == "Staff 02") continue;
+                                    <option value="@employee.PersonnelNumber">@employee.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 text-center">
+                <button class="btn btn-dark mt-4 lockUnlock" data-id="@Model.HeaderIndex" type="button"><i class="fa fa-lock-open" style="font-size: 2em;"></i></button>
+            </div>
+            <button class="btn btn-dark px-4 salesToggleTab" onclick="hideBar(this)" type="button"><i class="fa fa-chevron-up"></i></button>
+        </form>
+    </div>
+<script>
+    var selectedCustomerObject_@Model.HeaderIndex;
+</script>

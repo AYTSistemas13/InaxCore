@@ -1,0 +1,168 @@
+﻿@using InaxCore.Models.ViewModels
+@model CreateSaleHeaderViewModel
+@{
+    ViewData["Title"] = "Cotización";
+}
+
+@for (int i = 1; i <= 4; i++)
+{
+    Model.HeaderIndex = i;
+    <partial name="_SaleHeader" model="@Model" />
+}
+
+<div class="container-fluid my-4">
+    <div class="row py-2 mx-3">
+        <div class="" style="position:fixed; top:25.5%; left: 20px;z-index:100;">
+            <div class="row index-active" style="position: relative">
+                <i class="fa fa-lock-open index-lock" id="paginationIndex-1" ></i>
+                <button class="btn btn-outline-dark py-2" onclick="displaySale(1)" type="button">1</button>
+            </div>
+            <div class="row" style="position: relative">
+                <i class="fa fa-lock-open index-lock" id="paginationIndex-2"></i>
+                <button class="btn btn-outline-dark mt-3 py-2" onclick="displaySale(2)" type="button">2</button>
+            </div>
+            <div class="row" style="position: relative">
+                <i class="fa fa-lock-open index-lock" id="paginationIndex-3"></i>
+                <button class="btn btn-outline-dark mt-3 py-2" onclick="displaySale(3)" type="button">3</button>
+            </div>
+            <div class="row" style="position: relative">
+                <i class="fa fa-lock-open index-lock" id="paginationIndex-4"></i>
+                <button class="btn btn-outline-dark mt-3 py-2" onclick="displaySale(4)" type="button">4</button>
+            </div>
+        </div>
+        <div class="col-12 px-4">
+           
+
+            @{ int identifier = 1;}
+            <partial name="_LinesTable" model="identifier" />
+            <partial name="_LinesTable" model="identifier+1" />
+            <partial name="_LinesTable" model="identifier+2" />
+            <partial name="_LinesTable" model="identifier+3" />
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts{
+    <script>
+        var currentOpenTab = 1;
+        var customerInfoList;
+        $('body').attr('data-msj', 'Procesando Petición ...');
+        $('body').addClass('load-ajax');
+        $('body').append('<div class="lean-overlay"></div>');
+        $.get('@Url.Action("GetPrincipalInfo", "CreateSale")').done(function (data) {
+            customerInfoList = data.clientList.map(value => {
+                value.label = value.customerAccount + ' - ' + value.organizationName;
+                value.value = value.customerAccount;
+                return value;
+            });
+            localStorage.setItem('exchangeRate', data.exchangeRate);
+            for (i = 1; i <= 4; i++) {
+                $(`#clientCode-${i}`).autocomplete({
+                    autoFocus: true,
+                    minLength: 3,
+                    source: customerInfoList,
+                    select: function (event, item) {
+                        item = item.item;
+                        let index = $(this).data('index');
+                        $(`#clientName-${index}`).val(item.organizationName);
+                        $(`#clientType-${index}`).val(item.deliveryTerms);
+                        $(`#clientAddress-${index}`).val(item.fullPrimaryAddress);
+                        window[`selectedCustomerObject_${index}`] = item;
+                    }
+                });
+            }
+            $('body').removeClass('load-ajax');
+            $('body .lean-overlay').remove();
+        });
+
+
+        function hideBar(val) {
+            clase = val.children[0].className
+            if (clase == "fa fa-chevron-up") {
+                val.children[0].className = "fa fa-chevron-down";
+                val.parentElement.className = "row bg-dark pt-2 m-0 salesToggleBar";
+                val.parentElement.parentElement.className = "container-fluid index-menu";
+            } else {
+                val.children[0].className = "fa fa-chevron-up";
+                val.parentElement.className = "row bg-dark pt-2 m-0 salesToggleBar activeBar";
+                val.parentElement.parentElement.className = "container-fluid index-menu active";
+            }
+
+        }
+
+        function displaySale(saleFormId) {
+            $('#saleForm-' + saleFormId).show();
+            $('#saleHeader-' + saleFormId).show();
+            $('#disbaleDiv-' + saleFormId).show();
+            let currentPaginationButton = $(`#paginationIndex-${currentOpenTab}`).parent();
+            let nextPaginationButton = $(`#paginationIndex-${saleFormId}`).parent();
+            $(nextPaginationButton).addClass('index-active');
+            if(saleFormId != currentOpenTab) {
+                $('#saleForm-' + currentOpenTab).hide();
+                $('#saleHeader-' + currentOpenTab).hide();
+                $('#disbaleDiv-' + currentOpenTab).hide();
+                $(currentPaginationButton).removeClass('index-active');
+                currentOpenTab = saleFormId;
+            }
+        }
+
+        $('.addLine').click(function () {
+            let salesForm = $(this).data('id');
+            let lineHtml = `<tr class="lineObject">
+                    <th scope="row" class="p-0"><input type="checkbox" aria-label="Checkbox for following text input"> 1</th>
+                    <td class="p-0"><input id="itemCode" name="itemCode" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder="Codigo Articulo/Nombre"></td>
+                    <td class="p-0"><input id="itemName" name="itemName" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemQuantity" name="itemQuantity" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemUnit" name="itemUnit" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemSite" name="itemSite" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemWarehouse" name="itemWarehouse" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemLot" name="itemLot" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemLocation" name="itemLocation" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemPlate" name="itemPlate" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemCategory" name="itemCategory" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemCharge" name="itemCharge" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemTaxPrice" name="itemTaxPrice" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemAmmountCharge" name="itemAmmountCharge" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                    <td class="p-0"><input id="itemTaxAmmount" name="itemTaxAmmount" type="text" class="form-control form-control-sm" style="border-style: none;" placeholder=""></td>
+                </tr>`;
+            $(salesForm + ' .linesBody').append(lineHtml);
+        });
+
+        $('.lockUnlock').click(function () {
+            let id = $(this).data('id');
+            if (window[`selectedCustomerObject_${id}`] == undefined)
+                return toastr.warning('Favor de seleccionar cliente');
+            let lockState = $(this).children()[0];
+            let disableDiv = $(this).parent().parent().parent().children()[0];
+            let children = $(this).parent().parent().children()[0];
+            inputsArray = $(children).find('input');
+            inputsArray.push($(children).find('select'));
+            if ($(lockState).attr('class') == 'fa fa-lock-open') {
+                $(inputsArray).each(function (index, element) {
+                    $(element).attr('disabled','disabled');
+                });
+                $(lockState).removeClass();
+                $(lockState).addClass('fa fa-lock');
+                $(this).parent().parent().children()[2].click();
+                $(disableDiv).removeClass('active-div');
+                $(`#paginationIndex-${id}`).removeClass();
+                $(`#paginationIndex-${id}`).addClass('index-lock fa fa-lock ');
+
+            }else{
+                $(lockState).removeClass();
+                $(lockState).addClass('fa fa-lock-open');
+                $(disableDiv).addClass('active-div');
+                 $(inputsArray).each(function (index, element) {
+                    $(element).removeAttr('disabled');
+                });
+                $(`#paginationIndex-${id}`).removeClass();
+                $(`#paginationIndex-${id}`).addClass('index-lock fa fa-lock-open');
+            }     
+        });
+
+    </script>
+
+}
